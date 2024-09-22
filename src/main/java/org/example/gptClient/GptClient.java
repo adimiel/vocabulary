@@ -8,17 +8,19 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.example.config.EnvLoader;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class GptClient {
-    private static final String OPEN_AI_URL = "https://api.openai.com/v1/chat/completions";
-    private static final String OPEN_AI_KEY = "sk-LZeq0GCN-Lg7Lo0W6bKx0dt4D6z-K3AI14wSmKOIM9T3BlbkFJMQXdSHr2zlKxfFNAM9GgjGwPYk3kA4YvYWgovs56UA";
-
-
+    private static final String OPEN_AI_URL = EnvLoader.getApiUrl();
+    private static final String OPEN_AI_KEY = EnvLoader.getApiKey();
     private final CloseableHttpClient httpClient = HttpClients.createDefault();
 
     public String getResponseJson(String prompt) throws IOException {
@@ -26,7 +28,9 @@ public class GptClient {
         URL url;
         try {
             url = new URL(OPEN_AI_URL);
+            log.info("URL created correctly");
         } catch (MalformedURLException e) {
+            log.info("Invalid URL");
             throw new IllegalArgumentException("Invalid URL: " + OPEN_AI_URL, e);
         }
 
@@ -45,6 +49,7 @@ public class GptClient {
 
 
         try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+            log.info("GPT JSON generated");
             return EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
         }
     }
@@ -59,7 +64,7 @@ public class GptClient {
 
         String content = rootNode.path("choices").get(0).path("message").path("content").asText();
 
-        System.out.println(content);
+        log.info("Formatted GPT response");
 
         return content;
     }

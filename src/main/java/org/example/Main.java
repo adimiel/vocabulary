@@ -1,25 +1,40 @@
 package org.example;
 
 import org.example.gptClient.GptClient;
+import org.example.gptClient.Prompt;
+import org.example.mailModule.EmailSender;
+import org.example.config.EnvLoader;
 
 import java.io.IOException;
 
+import lombok.extern.slf4j.Slf4j;
+
+import static org.example.mailModule.EmailScheduler.scheduleDailyEmail;
+
+@Slf4j
 public class Main {
     public static void main(String[] args) throws IOException {
 
+        log.info("Application started.");
+
         GptClient client = new GptClient();
 
-        String response = client.getResponse("Wygeneruj 5 losowych słów po angielsku razem z polskim tłumaczeniem oraz przykłądem zastosowania w zdaniu." +
-                " Pozion słów powininen być zróżnicowany, powinny pojawaiać się słowa łątwe oraz zaawansowane");
+        Runnable emailTask = () -> {
+            log.info("Starting email sending task.");
+            String recipient = EnvLoader.getRecipient();
+            String subject = "English vocabulary";
+            String response = null;
+            try {
+                response = client.getResponse(Prompt.prompt);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
 
-        System.out.println();
-        System.out.println();
-        System.out.println();
+            EmailSender.sendEmail(recipient, subject, response);
+        };
 
-        System.out.println("Oto wygenerowane słowa do nauki \n " +
-                "===================================== \n " +
-                response +"\n" +
-                "=====================================");
+        scheduleDailyEmail(emailTask);
+
 
     }
 }
