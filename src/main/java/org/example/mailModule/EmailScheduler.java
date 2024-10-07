@@ -16,7 +16,7 @@ public class EmailScheduler {
         Calendar currentTime = Calendar.getInstance();
         Calendar nextRunTime = Calendar.getInstance();
 
-        nextRunTime.set(Calendar.HOUR_OF_DAY, 7);
+        nextRunTime.set(Calendar.HOUR_OF_DAY, 6);
         nextRunTime.set(Calendar.MINUTE, 0);
         nextRunTime.set(Calendar.SECOND, 0);
 

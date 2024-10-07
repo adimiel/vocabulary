@@ -65,6 +65,7 @@ public class GptClient {
         String content = rootNode.path("choices").get(0).path("message").path("content").asText();
 
         log.info("Formatted GPT response");
+        log.info("Email content: \n" + content );
 
         return content;
     }
