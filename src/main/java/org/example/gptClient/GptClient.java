@@ -51,6 +51,9 @@ public class GptClient {
         try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
             log.info("GPT JSON generated");
             return EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+        }catch (IOException e) {
+            log.error("An error occurred during HTTP request execution", e);
+            return "";
         }
     }
 
