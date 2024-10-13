@@ -1,42 +1,48 @@
 package org.example;
 
-import org.example.gptClient.GptClient;
-import org.example.gptClient.Prompt;
-import org.example.mailModule.EmailSender;
-import org.example.config.EnvLoader;
+// import org.example.gptClient.GptClient;
+// import org.example.gptClient.Prompt;
+// import org.example.mailModule.EmailSender;
+// import org.example.config.EnvLoader;
 
 import java.io.IOException;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
 
-import static org.example.mailModule.EmailScheduler.scheduleDailyEmail;
+// import static org.example.mailModule.EmailScheduler.scheduleDailyEmail;
 
-@Slf4j
 public class Vocabulary {
+    
+    private static final Logger logger = LoggerFactory.getLogger(Djob.class);
+
     public static void main(String[] args) throws IOException {
+        try {
+            logger.debug("First debug log");
+            logger.info("First info log");
+            Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
+            scheduler.start();
 
-        log.info("Application started.");
+            JobDetail job = JobBuilder.newJob(Djob.class)
+                    .withIdentity("dailyJob", "group1")
+                    .build();
 
+            Trigger trigger = TriggerBuilder.newTrigger()
+                    .withIdentity("dailyTrigger", "group1")
+                    .withSchedule(CronScheduleBuilder.cronSchedule("0 * * * * ?"))
+                    .build();
 
-        Runnable emailTask = () -> {
-            log.info("Starting email sending task.");
-            String recipient = EnvLoader.getRecipient();
-            String subject = "English vocabulary";
-            String response = null;
-            try {
-                GptClient client = new GptClient();
-                log.info("Before gpt - in try");
-                response = client.getResponse(Prompt.prompt);
-                log.info("Afrer gpt - in try");
-            } catch (IOException e) {
-                log.info("Problem - in catch" + e);
-                throw new RuntimeException(e);
-            }
-
-            EmailSender.sendEmail(recipient, subject, response);
-        };
-
-        scheduleDailyEmail(emailTask);
-
+            scheduler.scheduleJob(job, trigger);
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+        }
     }
 }
