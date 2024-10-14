@@ -1,16 +1,16 @@
 package org.example.mailModule;
 
-
-
 import java.util.Calendar;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 public class EmailScheduler {
+    
+    private static final Logger logger = LoggerFactory.getLogger(EmailScheduler.class);
 
     public static long getInitialDelay() {
         Calendar currentTime = Calendar.getInstance();
@@ -24,7 +24,7 @@ public class EmailScheduler {
             nextRunTime.add(Calendar.DAY_OF_MONTH, 1);
         }
 
-        log.info("Email is scheduled at: " + nextRunTime.getTime());
+        logger.info("Email is scheduled at: " + nextRunTime.getTime());
 
         return nextRunTime.getTimeInMillis() - currentTime.getTimeInMillis();
     }
@@ -35,7 +35,7 @@ public class EmailScheduler {
         long initialDelay = getInitialDelay();
         long period = TimeUnit.DAYS.toMillis(1);
 
-        log.info("Scheduling daily email task");
+        logger.info("Scheduling daily email task");
 
         scheduler.scheduleAtFixedRate(emailTask, initialDelay, period, TimeUnit.MILLISECONDS);
     }

@@ -1,17 +1,17 @@
 package org.example.mailModule;
 
-
-
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import org.example.config.EnvLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 public class EmailSender {
+    
+    private static final Logger logger = LoggerFactory.getLogger(EmailSender.class);
 
     private static Session createSession() {
 
@@ -36,7 +36,7 @@ public class EmailSender {
     public static void sendEmail(String to, String subject, String content) {
 
         Session session = createSession();
-        log.info("Email session created");
+        logger.debug("Email session created");
 
         try {
             Message message = new MimeMessage(session);
@@ -46,11 +46,11 @@ public class EmailSender {
             message.setText(content);
 
             Transport.send(message);
-            log.info("Email sent successfully to {}", to);
+            logger.info("Email sent successfully to {}", to);
 
 
         } catch (MessagingException e) {
-            log.error("Failed to send email to {}: ", to, e);
+            logger.error("Failed to send email to {}: ", to, e);
         }
     }
 }

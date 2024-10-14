@@ -9,16 +9,17 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.example.config.EnvLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-import lombok.extern.slf4j.Slf4j;
+public class GptClient {    
+    private static final Logger logger = LoggerFactory.getLogger(GptClient.class);
 
-@Slf4j
-public class GptClient {
     private static final String OPEN_AI_URL = EnvLoader.getApiUrl();
     private static final String OPEN_AI_KEY = EnvLoader.getApiKey();
     private final CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -28,12 +29,10 @@ public class GptClient {
         URL url;
         try {
             url = new URL(OPEN_AI_URL);
-            log.info("URL created correctly");
+            logger.debug("URL created correctly - {}", url.toString());
         } catch (MalformedURLException e) {
-            log.info("Invalid URL");
             throw new IllegalArgumentException("Invalid URL: " + OPEN_AI_URL, e);
         }
-
 
         HttpPost httpPost = new HttpPost(String.valueOf(url));
         httpPost.setHeader("Content-Type", "application/json; charset=UTF-8");
@@ -47,13 +46,12 @@ public class GptClient {
 
         httpPost.setEntity(new StringEntity(json, StandardCharsets.UTF_8));
 
+        logger.debug(httpPost.toString());
 
         try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-            log.info("GPT JSON generated");
+            logger.debug("Return code = {}", response.getStatusLine().getStatusCode());
+            logger.debug("Response - {}", response.getEntity().getContent());
             return EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-        }catch (IOException e) {
-            log.error("An error occurred during HTTP request execution", e);
-            return "";
         }
     }
 
@@ -67,8 +65,7 @@ public class GptClient {
 
         String content = rootNode.path("choices").get(0).path("message").path("content").asText();
 
-        log.info("Formatted GPT response");
-        log.info("Email content: \n" + content );
+        logger.debug("Email content: \n" + content );
 
         return content;
     }
